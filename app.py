@@ -21,7 +21,7 @@ def user_input():
 
         if missing:
             feedback = f"Missing fields for {', '.join(missing)}"
-            return render_template("data.html", feedback=feedback)
+            return render_template("form.html", feedback=feedback)
 
         return redirect(url_for('your_buddy'))
     # do a redirect
