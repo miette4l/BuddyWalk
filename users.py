@@ -34,6 +34,7 @@ class User:
         Finds the buddy or buddies?
         """
         # THIS IS CURRENTLY INCOMPLETE as cannot deal with multiple results
+        # And does nothing to do with location
         for user in users:
             if not user == self:
                 if abs(user.ToD - self.ToD) <= datetime.timedelta(0, 600):
@@ -74,8 +75,7 @@ def return_buddy(data: dict):
     user.search(data['CurrentLoc'], data['Destination'], data['ToD'])
     users = SearchingUsers.get_searching_users()
     buddy = user.find_buddy(users)
-    message = "Your buddy is: {}".format(buddy.username)
-    return message
+    return buddy
 
 
 # Test Cases #
