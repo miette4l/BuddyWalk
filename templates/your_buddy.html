@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BuddyWalk</title>
+</head>
+<body>
+<form action="/yourbuddy" method="POST">
+    <p>Your Buddy's details:</p>
+    {% for key, value in buddy.items() %}
+    <p>{{ key }} : {{ value }}</p>
+    {% endfor %}
+    <p><input type = "submit" value = "Show Map" /></p>
+</body>
+</html>

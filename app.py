@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for
+from flask import Flask, jsonify, request, render_template, redirect, url_for, send_file
 
 app = Flask(__name__)
 
@@ -7,6 +7,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def user_input():
+    """User inputs their user name, location, destination, time of departure. Redirect to finding buddy site."""
     data = {}
     if request.method == 'POST':
         data = request.form.to_dict()
@@ -28,10 +29,24 @@ def user_input():
     return render_template('form.html', data=data)
 
 
-@app.route('/yourbuddy', methods=['GET'])
+@app.route('/yourbuddy', methods=['GET', 'POST'])
 def your_buddy():
-    return 'Finding you a buddy'
+    """Prints buddy's details, redirects to map with route on button click"""
+    buddy = {'Name': 'Holly',
+             'Phone number': '12334556',
+             'Meeting Point': 'some address, some postcode',
+             'Meeting Time': '23:29 10/12/2021'}
+    if request.method == 'POST':
+        return redirect(url_for('show_map'))
+    return render_template('your_buddy.html', buddy=buddy)
 
+
+
+@app.route('/yourmap', methods=['GET'])
+def show_map():
+    """Shows map with route"""
+    f_map = 'f_map.html'  # replace with backend logic to generate map
+    return send_file(f'{f_map}') # opens up interactive map
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)  # localhost:5000 or 127.0.0.0.1:5000/
