@@ -131,3 +131,4 @@ dmypy.json
 # Added by Holly
 .DS_Store
 .idea/
+__pycache__
