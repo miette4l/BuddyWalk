@@ -10,6 +10,7 @@ def _connect_to_db(db_name: str):
                                   database=db_name)
     return cnx
 
+
 def get_all_records():
     db_connection = None
     try:
@@ -26,8 +27,10 @@ def get_all_records():
     except Exception:
         raise DBConnectionError('Failed to read the database')
 
+
 def main():
     get_all_records()
+
 
 if __name__ == '__main__':
     main()
