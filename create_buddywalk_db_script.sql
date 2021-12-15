@@ -18,7 +18,7 @@ Create table user_login (
 user_ID INTEGER NOT NULL,
 user_username VARCHAR (50) NOT NULL,
 user_password VARCHAR (50) NOT NULL,
-PRIMARY KEY (user_ID),
+PRIMARY KEY (user_username),
 FOREIGN KEY (user_ID) REFERENCES user_details(user_ID)
 );
 
@@ -27,6 +27,7 @@ user_username VARCHAR (50) NOT NULL,
 CurrentLoc VARCHAR (100) NOT NULL,
 Destination VARCHAR (100) NOT NULL,
 ToD VARCHAR (50) NOT NULL
+FOREIGN KEY (user_username) REFERENCES user_login(user_username)
 );
 
 use BuddyWalk;
