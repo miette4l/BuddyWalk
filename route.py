@@ -12,7 +12,7 @@ class Route:
         # initialise googlemaps client and call response
         API_KEY = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
         map_client = googlemaps.Client(API_KEY)
-        self.response = map_client.directions(current_location, destination, mode='walking')
+        self.response = map_client.directions(current_loc, destination, mode='walking')
 
     def get_current_loc_coord(self):
         """get latitude and longitude for current location"""
@@ -59,21 +59,21 @@ def create_map(current_location_coord, destination_coord, steps_coord):
     # save map to html file
     f_map.save(html_page)
 
+if __name__ == '__main__':
+    # replace with logic
+    current_location = '12 Bolton Drive, Glasgow, G42 9DY'
+    destination = 'Philies of Shwland'
 
-# replace with logic
-current_location = '12 Bolton Drive, Glasgow, G42 9DY'
-destination = 'Philies of Shwland'
+    # create route from Route class.
+    route = Route(current_location, destination)
 
-# create route from Route class.
-route = Route(current_location, destination)
-
-# get current location, destination and steps coordinates from Route object
-current_location_coord = route.get_current_loc_coord()
-destination_coord = route.get_destination_coord()
-steps_coord = route.get_steps_coord()
+    # get current location, destination and steps coordinates from Route object
+    current_location_coord = route.get_current_loc_coord()
+    destination_coord = route.get_destination_coord()
+    steps_coord = route.get_steps_coord()
 
 
-create_map(current_location_coord, destination_coord, steps_coord)
+    create_map(current_location_coord, destination_coord, steps_coord)
 
 
 

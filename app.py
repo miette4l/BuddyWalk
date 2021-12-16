@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session, send_file
+from flask import Flask, request, render_template, redirect, url_for, session, send_file
 from find_buddy import find_buddy
 from SQL_DB_to_python_connect import add_journey_request
+from route import Route, create_map
 
 app = Flask(__name__)
 app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
@@ -47,13 +48,20 @@ def your_buddy():
     buddy_username = find_buddy(session['current_user'])
 
     buddy = {
-        'Username': buddy_username,
+        'Username': buddy_username, # my own username gets returned, not my buddy's!!
         'Phone number': 'fake phonenumber',
-        'Meeting Point': 'fake spot',
-        'Time to meet': 'fake'
+        'Meeting point': '140 Titwood Rd, Crossmyloof, Glasgow G41 4DA', # add meeting point and joint destination logic
+        'Joint destination': 'Phillies of Shawlands',
+        'Time to meet': 'fake' # shall we say ToD + 10 minutes or so?
     }
 
     if request.method == 'POST':
+        # posts session details into routing functions
+        route = Route(current_loc=buddy['Meeting point'], destination=buddy['Joint destination'])
+        current_loc_coords = route.get_current_loc_coord()
+        destination_coords = route.get_destination_coord()
+        steps_coords = route.get_steps_coord()
+        create_map(current_loc_coords, destination_coords, steps_coords)
         return redirect(url_for('show_map'))
     return render_template('your_buddy.html', buddy=buddy)
 
