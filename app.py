@@ -1,7 +1,9 @@
 from flask import Flask, request, render_template, redirect, url_for, session, send_file
+import datetime
 from find_buddy import find_buddy
 from SQL_DB_to_python_connect import add_journey_request
 from route import Route, create_map
+
 
 app = Flask(__name__)
 app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
@@ -26,7 +28,7 @@ def user_input():
         data = request.form.to_dict()
         session['current_user'] = data
         add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
-
+        print(type(data['ToD']))
     missing = []
     for k, v in data.items():
         if v == "":
@@ -46,13 +48,21 @@ def your_buddy():
     Finds and prints buddy's details, redirects to map with route on button click
     """
     buddy_username = find_buddy(session['current_user'])
+    buddy_phone_number = "buddy's fake phone number" # add logic for phone number
+
+    meeting_time = datetime.datetime.strptime(session['current_user']['ToD'], "%H:%M")
+    meeting_time = (meeting_time + datetime.timedelta(minutes=10)).time() # meeting time is ToD + 10 minutes
+
+    # add meeting point logic, i.e. get_meeting_point(current_loc) or so
+    meeting_point = '140 Titwood Rd, Crossmyloof, Glasgow G41 4DA'
+    joint_destination = 'Phillies of Shawlands'
 
     buddy = {
         'Username': buddy_username, # my own username gets returned, not my buddy's!!
-        'Phone number': 'fake phonenumber',
-        'Meeting point': '140 Titwood Rd, Crossmyloof, Glasgow G41 4DA', # add meeting point and joint destination logic
-        'Joint destination': 'Phillies of Shawlands',
-        'Time to meet': 'fake' # shall we say ToD + 10 minutes or so?
+        'Phone number': buddy_phone_number,
+        'Meeting point': meeting_point,
+        'Joint destination': joint_destination,
+        'Time to meet': meeting_time
     }
 
     if request.method == 'POST':
@@ -62,7 +72,9 @@ def your_buddy():
         destination_coords = route.get_destination_coord()
         steps_coords = route.get_steps_coord()
         create_map(current_loc_coords, destination_coords, steps_coords)
+
         return redirect(url_for('show_map'))
+
     return render_template('your_buddy.html', buddy=buddy)
 
 

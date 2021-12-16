@@ -59,6 +59,7 @@ def create_map(current_location_coord, destination_coord, steps_coord):
     # save map to html file
     f_map.save(html_page)
 
+
 if __name__ == '__main__':
     # replace with logic
     current_location = '12 Bolton Drive, Glasgow, G42 9DY'
@@ -72,9 +73,4 @@ if __name__ == '__main__':
     destination_coord = route.get_destination_coord()
     steps_coord = route.get_steps_coord()
 
-
     create_map(current_location_coord, destination_coord, steps_coord)
-
-
-
-
