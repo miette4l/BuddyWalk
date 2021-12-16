@@ -80,8 +80,8 @@ VALUES
 (017, 'CalJones', 'cecilback9'),
 (018, 'SachaE', 'Halefield17'),
 (019, 'Odetoto', 'Lordship1993'),
-(020, 'IbenH', 'percysquare')
-(021, 'geefwee', 'Ilovephoebs')
-(022, 'phoebe', 'meowmeow')
+(020, 'IbenH', 'percysquare'),
+(021, 'geefwee', 'Ilovephoebs'),
+(022, 'phoebe', 'meowmeow'),
 (023, 'holly', 'bauble88')
 ;
