@@ -128,8 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Added by Holly
+# Added by Hollys
 .DS_Store
 .idea/
 __pycache__
-config
