@@ -132,6 +132,3 @@ dmypy.json
 .DS_Store
 .idea/
 __pycache__
-
-# Added by Verena
-f_map.html
