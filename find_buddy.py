@@ -10,7 +10,8 @@ def find_buddy(current_user):
     2. Loop over those JRs to find that with nearest lat & long for current_loc and destination
     """
     ToD = current_user['ToD']
-    time = datetime.datetime.fromisoformat(ToD)
+    #time = datetime.datetime.fromisoformat(ToD)
+    time = datetime.datetime.strptime(ToD, '%H:%M') # added by Verena - only time instead of datetime
     time_change = datetime.timedelta(minutes=10)
     min_time = time - time_change
     max_time = time + time_change
