@@ -18,15 +18,18 @@ Create table user_login (
 user_ID INTEGER NOT NULL,
 user_username VARCHAR (50) NOT NULL,
 user_password VARCHAR (50) NOT NULL,
-PRIMARY KEY (user_ID),
+PRIMARY KEY (user_username),
 FOREIGN KEY (user_ID) REFERENCES user_details(user_ID)
 );
 
 Create table journey_requests (
 user_username VARCHAR (50) NOT NULL,
-CurrentLoc VARCHAR (100) NOT NULL,
-Destination VARCHAR (100) NOT NULL,
-ToD VARCHAR (50) NOT NULL
+CurrentLocLat FLOAT NOT NULL,
+CurrentLocLng FLOAT NOT NULL,
+DestinationLat FLOAT NOT NULL,
+DestinationLng FLOAT NOT NULL,
+ToD VARCHAR (50) NOT NULL,
+FOREIGN KEY (user_username) REFERENCES user_login(user_username)
 );
 
 use BuddyWalk;
@@ -80,8 +83,5 @@ VALUES
 (017, 'CalJones', 'cecilback9'),
 (018, 'SachaE', 'Halefield17'),
 (019, 'Odetoto', 'Lordship1993'),
-(020, 'IbenH', 'percysquare'),
-(021, 'geefwee', 'Ilovephoebs'),
-(022, 'phoebe', 'meowmeow'),
-(023, 'holly', 'bauble88')
+(020, 'IbenH', 'percysquare')
 ;
