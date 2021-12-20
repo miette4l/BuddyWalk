@@ -1,6 +1,5 @@
 from db_utils import DB
 import datetime
-from geopy import distance
 from haversine import haversine, Unit
 import math
 import googlemaps

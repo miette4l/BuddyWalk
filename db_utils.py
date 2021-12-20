@@ -1,6 +1,5 @@
 import mysql.connector
 from config import USER, PASSWORD, HOST
-import math
 
 
 class DBConnectionError(Exception):
