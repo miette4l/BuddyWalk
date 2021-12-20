@@ -22,10 +22,10 @@ def find_buddy(current_user: dict):
     candidates = DB.get_matching_journeys(
         min_time,
         max_time,
-        current_user['curr_loc_lat'],  # convert from degrees to rads
-        current_user['curr_loc_lng'],
-        current_user['destination_lat'],
-        current_user['destination_lng'],
+        current_user['curr_loc_lat'] * math.pi / 180,  # convert from degrees to rads to match DB
+        current_user['curr_loc_lng'] * math.pi / 180,
+        current_user['destination_lat'] * math.pi / 180,
+        current_user['destination_lng'] * math.pi / 180,
         current_user['username']
     )
     print("Candidates:", candidates)

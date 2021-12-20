@@ -75,7 +75,7 @@ def user_input():
     # Save data in to session for use in future routes
     session['current_user'] = current_user  # could just pass over current user ID
 
-    # Convert from degrees to rads for DB storage & find_buddy()
+    # Convert from degrees to rads for DB storage
     curr_loc_lat = curr_loc_lat * math.pi / 180
     curr_loc_lng = curr_loc_lng * math.pi / 180
     destination_lat = destination_lat * math.pi / 180
