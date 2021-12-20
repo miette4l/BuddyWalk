@@ -54,7 +54,7 @@ class DB:
             raise DBConnectionError('Failed to read the database')
 
     @staticmethod
-    def add_journey_request(username, currentloc_lat, currentloc_lng, destination_lat, destination_lng, ToD):
+    def add_journey_request(username, currentloc_lat, currentloc_lng, destination_lat, destination_lng, tod):
         db_connection = None
         try:
             db_name = "BuddyWalk"
@@ -65,7 +65,7 @@ class DB:
             (user_username, CurrentLocLat, CurrentLocLng, DestinationLat, DestinationLng, ToD)
             VALUES (%s, %s, %s, %s, %s, %s)
             """
-            values = (username, currentloc_lat, currentloc_lng, destination_lat, destination_lng, ToD)
+            values = (username, currentloc_lat, currentloc_lng, destination_lat, destination_lng, tod)
             cursor.execute(query, values)
             db_connection.commit()
             print(cursor.rowcount, "record inserted.")

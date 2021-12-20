@@ -1,14 +1,10 @@
 from db_utils import DB
 import datetime
-import googlemaps
 from geopy import distance
 from haversine import haversine, Unit
-gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 import math
-
-
-class BuddyNotFoundError(Exception):
-    pass
+import googlemaps
+gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 
 
 def find_buddy(current_user: dict):
@@ -33,17 +29,15 @@ def find_buddy(current_user: dict):
         current_user['destination_lng'],
         current_user['username']
     )
-
     print("Candidates:", candidates)
 
     user_curr_loc = (current_user['curr_loc_lat'], current_user['curr_loc_lng'])
     user_dest = (current_user['destination_lat'], current_user['destination_lng'])
-    print("Distance between user's current location and destination:", haversine(user_curr_loc, user_dest, unit=Unit.MILES), "miles")
 
     totals = []
     for i, candidate in enumerate(candidates):
-        candidate_curr_loc = (candidate[1] * 180 / math.pi, candidate[2] * 180/ math.pi)
-        candidate_dest = (candidate[3] * 180/ math.pi, candidate[4] * 180/ math.pi)
+        candidate_curr_loc = (candidate[1] * 180 / math.pi, candidate[2] * 180 / math.pi)
+        candidate_dest = (candidate[3] * 180 / math.pi, candidate[4] * 180 / math.pi)
         starting_distance = haversine(user_curr_loc, candidate_curr_loc, unit=Unit.MILES)
         dest_distance = haversine(user_dest, candidate_dest, unit=Unit.MILES)
         total = starting_distance + dest_distance
