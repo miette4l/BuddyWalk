@@ -23,12 +23,7 @@ def user_input():
     Grab user data from form, while checking if complete
     Save data as new record in DB
     """
-    data = {}
-    if request.method == 'POST':
-        data = request.form.to_dict()
-        session['current_user'] = data
-        add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
-        print(type(data['ToD']))
+    data = request.form.to_dict()
     missing = []
     for k, v in data.items():
         if v == "":
@@ -37,6 +32,9 @@ def user_input():
     if missing:
         feedback = f"Missing fields for {', '.join(missing)}"
         return render_template("form.html", feedback=feedback)
+
+    session['current_user'] = data
+    add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
 
     return redirect(url_for('your_buddy'))
     # do a redirect to result page
