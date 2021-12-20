@@ -2,10 +2,14 @@ from db_utils import DB
 import datetime
 import googlemaps
 from geopy import distance
+from haversine import haversine, Unit
 gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
+import math
+
 
 class BuddyNotFoundError(Exception):
     pass
+
 
 def find_buddy(current_user: dict):
     """
@@ -16,42 +20,37 @@ def find_buddy(current_user: dict):
 
     tod = current_user['tod']
     time = datetime.datetime.fromisoformat(tod)
-    time_window = datetime.timedelta(minutes=10)
-    min_time = time - time_window
-    max_time = time + time_window
+    time_window = datetime.timedelta(minutes=30)
+    min_time = (time - time_window).isoformat()
+    max_time = (time + time_window).isoformat()
 
-    curr_loc_lat = current_user['curr_loc_lat']
-    curr_loc_lng = current_user['curr_loc_lng']
-    curr_dest_lat = current_user['destination_lat']
-    curr_dest_lng = current_user['destination_lng']
-    username = current_user['username']
+    candidates = DB.get_matching_journeys(
+        min_time,
+        max_time,
+        current_user['curr_loc_lat'],  # convert from degrees to rads
+        current_user['curr_loc_lng'],
+        current_user['destination_lat'],
+        current_user['destination_lng'],
+        current_user['username']
+    )
 
-    candidates = DB.get_matching_journeys(min_time, max_time,
-                      curr_loc_lat, curr_loc_lng, curr_dest_lat, curr_dest_lng,
-                      username)
+    print("Candidates:", candidates)
 
-    if not candidates:
-        raise BuddyNotFoundError("We could not find you a buddy! :(")
+    user_curr_loc = (current_user['curr_loc_lat'], current_user['curr_loc_lng'])
+    user_dest = (current_user['destination_lat'], current_user['destination_lng'])
+    print("Distance between user's current location and destination:", haversine(user_curr_loc, user_dest, unit=Unit.MILES), "miles")
 
-    user_curr_loc = str((curr_loc_lat, curr_loc_lng)).replace(',', "")
-    user_dest = str((curr_dest_lat, curr_dest_lng)).replace(',', "")
-
-    total_diffs = []
+    totals = []
     for i, candidate in enumerate(candidates):
-        candidate_curr_loc = (candidate[1], candidate[2])
-        candidate_curr_loc = str(candidate_curr_loc).replace(',', "")
-        candidate_dest = (candidate[3], candidate[4])
-        candidate_dest = str(candidate_dest).replace(',', "")
-        response = gmaps.distance_matrix(user_curr_loc, candidate_curr_loc, 'walking')
-        current_loc_diff = (response['rows'][0]['elements'][0]['duration']['value'])
-        response = gmaps.distance_matrix(user_dest, candidate_dest, 'walking')
-        destination_diff = (response['rows'][0]['elements'][0]['duration']['value'])
-        total_diff = current_loc_diff + destination_diff
-        total_diffs.append(total_diff)
-
-    minimum = min(total_diffs)
-    pos = minutes.index(minimum)
-    buddy = candidates[pos][0]
+        candidate_curr_loc = (candidate[1] * 180 / math.pi, candidate[2] * 180/ math.pi)
+        candidate_dest = (candidate[3] * 180/ math.pi, candidate[4] * 180/ math.pi)
+        starting_distance = haversine(user_curr_loc, candidate_curr_loc, unit=Unit.MILES)
+        dest_distance = haversine(user_dest, candidate_dest, unit=Unit.MILES)
+        total = starting_distance + dest_distance
+        totals.append(total)
+    minimum = min(totals)
+    pos = totals.index(minimum)
+    buddy = candidates[pos]
     return buddy
 
 
@@ -59,3 +58,20 @@ def geocode(loc: str) -> tuple:
     geocoded = gmaps.geocode(loc)[0]['geometry']['location']
     return geocoded
 
+
+def check_in_range(curr_loc_coords: tuple) -> bool:
+    london = (51.509865, -0.118092)
+    curr_loc_coords = (float(val) for val in curr_loc_coords)
+    distance = haversine(curr_loc_coords, london, unit=Unit.MILES)
+    if distance < 10:
+        return True
+    return False
+
+
+def check_journey_length(curr_loc_coords: tuple, dest_coords: tuple) -> bool:
+    curr_loc_coords = (float(val) for val in curr_loc_coords)
+    dest_coords = (float(val) for val in dest_coords)
+    distance = haversine(curr_loc_coords, dest_coords, unit=Unit.MILES)
+    if distance < 10:
+        return True
+    return False

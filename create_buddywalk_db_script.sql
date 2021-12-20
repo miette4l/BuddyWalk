@@ -24,10 +24,10 @@ FOREIGN KEY (user_ID) REFERENCES user_details(user_ID)
 
 Create table journey_requests (
 user_username VARCHAR (50) NOT NULL,
-CurrentLocLat FLOAT NOT NULL,
-CurrentLocLng FLOAT NOT NULL,
-DestinationLat FLOAT NOT NULL,
-DestinationLng FLOAT NOT NULL,
+CurrentLocLat DOUBLE (33, 30) NOT NULL,
+CurrentLocLng DOUBLE (33, 30) NOT NULL,
+DestinationLat DOUBLE (33, 30) NOT NULL,
+DestinationLng DOUBLE (33, 30) NOT NULL,
 ToD VARCHAR (50) NOT NULL
 --FOREIGN KEY (user_username) REFERENCES user_login(user_username)
 );
