@@ -1,14 +1,12 @@
 from flask import Flask, request, render_template, redirect, url_for, session, send_file
 import datetime
-from find_buddy import find_buddy
-from SQL_DB_to_python_connect import add_journey_request
+from find_buddy import find_buddy, geocode
+from db_utils import DB
 from route import Route, create_map
 
 
 app = Flask(__name__)
 app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
-
-# note: Time of Departure is a str
 
 
 @app.route('/', methods=['GET'])
@@ -20,15 +18,50 @@ def display_form():
 @app.route('/', methods=['POST'])
 def user_input():
     """
-    Grab user data from form, while checking if complete
-    Save data as new record in DB
+    Grab user data from form
+    Process and save as new record in DB
     """
     data = {}
     if request.method == 'POST':
         data = request.form.to_dict()
-        session['current_user'] = data
-        add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
-        print(type(data['ToD']))
+
+        # Process data to be stored in DB for searching
+        username = data['username']
+        curr_loc = geocode(data['CurrentLoc'])
+        curr_loc_lat = curr_loc['lat']
+        curr_loc_lng = curr_loc['lng']
+        destination = geocode(data['Destination'])
+        destination_lat = destination['lat']
+        destination_lng = destination['lng']
+        tod = data['ToD']  # 'tod' = 'Time of Departure' (isoformat str)
+
+        # Handle invalid location input
+        # check_loc_inputs()
+
+        # Handle invalid time input
+        # could change to check_time_inputs()function
+        now = datetime.datetime.now()
+        time_given = datetime.datetime.fromisoformat(tod)
+        time_diff = datetime.timedelta(minutes=20)
+        if time_given < now:
+            raise ValueError("Time of Departure is in the past!")
+        if time_given - now > time_diff:
+            raise ValueError("Time of Departure too far ahead!")
+
+        DB.add_journey_request(username, curr_loc_lat, curr_loc_lng,
+                               destination_lat, destination_lng, tod)
+
+        current_user = {'username': username,
+                        'curr_loc_lat': curr_loc_lat,
+                        'curr_loc_lng': curr_loc_lng,
+                        'destination_lat': destination_lat,
+                        'destination_lng': destination_lng,
+                        'tod': tod}
+
+        print(current_user)
+
+        session['current_user'] = current_user
+
     missing = []
     for k, v in data.items():
         if v == "":
@@ -45,20 +78,22 @@ def user_input():
 @app.route('/yourbuddy', methods=['GET', 'POST'])
 def your_buddy():
     """
-    Finds and prints buddy's details, redirects to map with route on button click
+    Find and print buddy's details
+    Redirect to map with route on button click
     """
     buddy_username = find_buddy(session['current_user'])
-    buddy_phone_number = "buddy's fake phone number" # add logic for phone number
+    buddy_phone_number = "buddy's fake phone number"  # add logic for phone number
 
     meeting_time = datetime.datetime.strptime(session['current_user']['ToD'], "%H:%M")
-    meeting_time = (meeting_time + datetime.timedelta(minutes=10)).time() # meeting time is ToD + 10 minutes
+    meeting_time = (meeting_time + datetime.timedelta(minutes=10)).time()  # meeting time is ToD + 10 minutes
 
     # add meeting point logic, i.e. get_meeting_point(current_loc) or so
     meeting_point = '140 Titwood Rd, Crossmyloof, Glasgow G41 4DA'
     joint_destination = 'Phillies of Shawlands'
 
+    # this is where all data to display should be collected
     buddy = {
-        'Username': buddy_username, # my own username gets returned, not my buddy's!!
+        'Username': buddy_username,  # my own username gets returned, not my buddy's!!
         'Phone number': buddy_phone_number,
         'Meeting point': meeting_point,
         'Joint destination': joint_destination,

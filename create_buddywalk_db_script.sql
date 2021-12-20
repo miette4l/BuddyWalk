@@ -28,8 +28,8 @@ CurrentLocLat FLOAT NOT NULL,
 CurrentLocLng FLOAT NOT NULL,
 DestinationLat FLOAT NOT NULL,
 DestinationLng FLOAT NOT NULL,
-ToD VARCHAR (50) NOT NULL,
-FOREIGN KEY (user_username) REFERENCES user_login(user_username)
+ToD VARCHAR (50) NOT NULL
+--FOREIGN KEY (user_username) REFERENCES user_login(user_username)
 );
 
 use BuddyWalk;
