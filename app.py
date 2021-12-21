@@ -25,6 +25,7 @@ def user_input():
     data = request.form.to_dict()
 
     # Check for missing values
+
     missing = []
     for k, v in data.items():
         if v == "":
@@ -84,6 +85,10 @@ def user_input():
     # Save data to DB
     DB.add_journey_request(username, curr_loc_lat, curr_loc_lng,
                            destination_lat, destination_lng, tod)
+
+    #session['current_user'] = data
+    #add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
+
 
     return redirect(url_for('your_buddy'))
     # do a redirect to result page
