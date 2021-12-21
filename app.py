@@ -1,14 +1,13 @@
 from flask import Flask, request, render_template, redirect, url_for, session, send_file
 import datetime
-from find_buddy import find_buddy
-from SQL_DB_to_python_connect import add_journey_request
+from find_buddy import find_buddy, geocode, check_in_range, check_journey_length
+from db_utils import DB
 from route import Route, create_map
+import math
 
 
 app = Flask(__name__)
 app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
-
-# note: Time of Departure is a str
 
 
 @app.route('/', methods=['GET'])
@@ -20,10 +19,13 @@ def display_form():
 @app.route('/', methods=['POST'])
 def user_input():
     """
-    Grab user data from form, while checking if complete
-    Save data as new record in DB
+    Grab user data from form
+    Process and save as new record in DB
     """
     data = request.form.to_dict()
+
+    # Check for missing values
+
     missing = []
     for k, v in data.items():
         if v == "":
@@ -33,8 +35,60 @@ def user_input():
         feedback = f"Missing fields for {', '.join(missing)}"
         return render_template("form.html", feedback=feedback)
 
-    session['current_user'] = data
-    add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
+    # Process data for lat, lng locations and isoformat str time
+    username = data['username']
+    curr_loc = geocode(data['CurrentLoc'])  # convert to lat, lng using gmaps.geocode
+    curr_loc_lat = curr_loc['lat']  # unit: latitude in degrees
+    curr_loc_lng = curr_loc['lng']  # unit: longitude in degrees
+    curr_loc_coords = (curr_loc_lat, curr_loc_lng)
+    destination = geocode(data['Destination'])
+    destination_lat = destination['lat']
+    destination_lng = destination['lng']
+    dest_coords = (destination_lat, destination_lng)
+    tod = data['ToD']  # 'tod' = 'Time of Departure' as isoformat str
+
+    # Handle invalid location input
+    # 1. check current location is in range i.e. within 10 miles of the centrepoint of London
+    if not check_in_range(curr_loc_coords):
+        raise ValueError("You are out of the app's range!")
+    # 2. check current location and destination are within 10 miles of each other
+    if not check_journey_length(curr_loc_coords, dest_coords):
+        raise ValueError("Your journey is too long.")
+
+    # Handle invalid time input
+    # could change to check_time_inputs()function
+    now = datetime.datetime.now()
+    time_given = datetime.datetime.fromisoformat(tod)
+    time_diff = datetime.timedelta(minutes=20)
+    if time_given < now:
+        raise ValueError("Time of Departure is in the past!")
+    if time_given - now > time_diff:
+        raise ValueError("Time of Departure too far ahead!")
+
+    # Store data as processed in dict
+    current_user = {'username': username,
+                    'curr_loc_lat': curr_loc_lat,
+                    'curr_loc_lng': curr_loc_lng,
+                    'destination_lat': destination_lat,
+                    'destination_lng': destination_lng,
+                    'tod': tod}
+
+    # Save data in to session for use in future routes
+    session['current_user'] = current_user  # could just pass over current user ID
+
+    # Convert from degrees to rads for DB storage
+    curr_loc_lat = curr_loc_lat * math.pi / 180
+    curr_loc_lng = curr_loc_lng * math.pi / 180
+    destination_lat = destination_lat * math.pi / 180
+    destination_lng = destination_lng * math.pi / 180
+
+    # Save data to DB
+    DB.add_journey_request(username, curr_loc_lat, curr_loc_lng,
+                           destination_lat, destination_lng, tod)
+
+    #session['current_user'] = data
+    #add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
+
 
     return redirect(url_for('your_buddy'))
     # do a redirect to result page
@@ -43,20 +97,22 @@ def user_input():
 @app.route('/yourbuddy', methods=['GET', 'POST'])
 def your_buddy():
     """
-    Finds and prints buddy's details, redirects to map with route on button click
+    Find and print buddy's details
+    Redirect to map with route on button click
     """
-    buddy_username = find_buddy(session['current_user'])
-    buddy_phone_number = "buddy's fake phone number" # add logic for phone number
+    # Prepare buddy info for buddy dict
+    buddy_journey = find_buddy(session['current_user'])
+    buddy_phone_number = "buddy's fake phone number"  # add logic for phone number
+    tod = datetime.datetime.fromisoformat(session['current_user']['tod'])
+    meeting_time = (tod + datetime.timedelta(minutes=10)).time()  # meeting time is ToD + 10 minutes
 
-    meeting_time = datetime.datetime.strptime(session['current_user']['ToD'], "%H:%M")
-    meeting_time = (meeting_time + datetime.timedelta(minutes=10)).time() # meeting time is ToD + 10 minutes
-
-    # add meeting point logic, i.e. get_meeting_point(current_loc) or so
+    # Add meeting point logic, i.e. get_meeting_point(current_loc) or so HERE
     meeting_point = '140 Titwood Rd, Crossmyloof, Glasgow G41 4DA'
     joint_destination = 'Phillies of Shawlands'
 
+    # Create dict for display
     buddy = {
-        'Username': buddy_username, # my own username gets returned, not my buddy's!!
+        'Username': buddy_journey[0],  # my own username gets returned, not my buddy's!!
         'Phone number': buddy_phone_number,
         'Meeting point': meeting_point,
         'Joint destination': joint_destination,
@@ -78,7 +134,7 @@ def your_buddy():
 
 @app.route('/yourmap', methods=['GET'])
 def show_map():
-    """Shows map with route"""
+    """Show map with route"""
     f_map = 'f_map.html'  # replace with backend logic to generate map
     return send_file(f'{f_map}')  # opens up interactive map
 
