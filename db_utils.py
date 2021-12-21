@@ -8,6 +8,7 @@ class DBConnectionError(Exception):
 
 class DB:
 
+    @staticmethod
     def _connect_to_db(db_name: str):
         cnx = mysql.connector.connect(host=HOST,
                                       user=USER,
@@ -17,8 +18,8 @@ class DB:
         return cnx
 
     @staticmethod
-    def get_all_records():
-        db_connection = None
+    def get_all_user_records():
+
         try:
             db_name = "BuddyWalk"
             db_connection = DB._connect_to_db(db_name)
@@ -36,7 +37,7 @@ class DB:
 
     @staticmethod
     def get_all_journey_requests():
-        db_connection = None
+
         try:
             db_name = "BuddyWalk"
             db_connection = DB._connect_to_db(db_name)
@@ -62,7 +63,7 @@ class DB:
             destination_lng,
             tod,
             phone_no):
-        db_connection = None
+
         try:
             db_name = "BuddyWalk"
             db_connection = DB._connect_to_db(db_name)
@@ -83,7 +84,7 @@ class DB:
                 phone_no)
             cursor.execute(query, values)
             db_connection.commit()
-            print(cursor.rowcount, "record inserted.")
+            print(cursor.rowcount, "record successfully inserted into Journey Requests table.")
             cursor.close()
 
         except Exception:
@@ -99,7 +100,7 @@ class DB:
             curr_dest_lng,
             username
     ):
-        db_connection = None
+
         try:
             db_name = "BuddyWalk"
             db_connection = DB._connect_to_db(db_name)
@@ -139,7 +140,6 @@ class DB:
             curr_dest_lat,
             curr_dest_lng,
             username)
-        print(values)
 
         cursor.execute(query1, values)
         cursor.execute(query2)
@@ -157,7 +157,6 @@ class DB:
 
     @staticmethod
     def get_record(user_id):
-        print("user_id:", user_id)
         db_connection = None
         try:
             db_name = "BuddyWalk"
@@ -171,8 +170,52 @@ class DB:
         user_id = %s
         """
         cursor.execute(query, (user_id,))  # this syntax looks wrong, but is necessary
-        result = cursor.fetchall()
-        print("user_id:", user_id)
-        print("Journey Request record:", result)
+        result = cursor.fetchall()[0]
+        if not result:
+            print("Could not get record.")
         cursor.close()
         return result
+
+    @staticmethod
+    def add_match(journey_request, buddy_journey_request):
+
+        try:
+            db_name = "BuddyWalk"
+            db_connection = DB._connect_to_db(db_name)
+            cursor = db_connection.cursor()
+            query = """
+            INSERT INTO BuddyWalk.matches
+            (user_id_1, user_id_2)
+            VALUES (%s, %s)
+            """
+            values = (journey_request[0], buddy_journey_request[0])
+            cursor.execute(query, values)
+            db_connection.commit()
+            print(cursor.rowcount, "record successfully inserted into Matches table.")
+            cursor.close()
+
+        except Exception:
+            raise DBConnectionError('Failed to read the database')
+
+    @staticmethod
+    def delete_matched_journeys(journey_request, buddy_journey_request):
+        db_connection = None
+        try:
+            db_name = "BuddyWalk"
+            db_connection = DB._connect_to_db(db_name)
+            cursor = db_connection.cursor()
+            query = """
+            DELETE FROM BuddyWalk.journey_requests
+            WHERE
+            user_id = %s
+            OR
+            user_id = %s
+            """
+            values = (journey_request[0], buddy_journey_request[0])
+            cursor.execute(query, values)
+            db_connection.commit()
+            print(cursor.rowcount, "records successfully deleted from Journey Requests table.")
+            cursor.close()
+
+        except Exception:
+            raise DBConnectionError('Failed to read the database')

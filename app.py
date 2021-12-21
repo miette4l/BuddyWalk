@@ -36,24 +36,24 @@ def user_input():
         return render_template("form.html", feedback=feedback)
 
     # Process inputted data into DB record data
-    user_id = str(uuid.uuid1())
+    user_id = str(uuid.uuid1())  # create unique user ID
     username = data['username']
     phone_no = data['phone_no']
     curr_loc = geocode(data['current_loc'])  # convert to lat, lng using gmaps.geocode
     curr_loc_lat = curr_loc['lat']  # unit: latitude in degrees
     curr_loc_lng = curr_loc['lng']  # unit: longitude in degrees
-    curr_loc_coords = (curr_loc_lat, curr_loc_lng)
+    curr_loc_coords = (curr_loc_lat, curr_loc_lng)  # create (lat, lng) tuple
     destination = geocode(data['destination'])
     destination_lat = destination['lat']
     destination_lng = destination['lng']
     dest_coords = (destination_lat, destination_lng)
-    tod = data['tod']  # 'tod' = 'Time of Departure' as isoformat string
+    tod = data['tod']  # 'tod' = 'Time of Departure' as iso-format string
 
     # Handle invalid phone number input
     # <HERE>
 
     # Handle invalid location input
-    # 1. check current location is in range i.e. within 10 miles of the centrepoint of London
+    # 1. check current location is in range i.e. within 10 miles of the center-point of London
     if not check_in_range(curr_loc_coords):
         raise ValueError("You are out of the app's range!")
     # 2. check current location and destination are within 10 miles of each other
@@ -111,13 +111,21 @@ def your_buddy():
     """
     # Get user's journey request from DB
     journey_request = DB.get_record(session['user_id'])
-    print("Journey request:", journey_request)
+    print("User's Journey request:", journey_request)
 
     # Run find_buddy() on user's JR
     buddy_journey_request = find_buddy(journey_request)  # Stores the buddy's JR
+    print("Buddy's Journey request:", buddy_journey_request)
+    print("Buddies:", journey_request[1], "and", buddy_journey_request[1])
+
+    # Add match in DB
+    DB.add_match(journey_request, buddy_journey_request)
+
+    # Delete JRs from DB so matched users will no longer appear in other users' searches
+    DB.delete_matched_journeys(journey_request, buddy_journey_request)
 
     # Prepare meeting time: ToD + 10 mins
-    tod = datetime.datetime.fromisoformat(journey_request[0][6])
+    tod = datetime.datetime.fromisoformat(journey_request[6])
     meeting_time = (tod + datetime.timedelta(minutes=10)).time()
 
     # Add meeting point and joint destination logic

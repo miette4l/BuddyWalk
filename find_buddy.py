@@ -9,19 +9,19 @@ gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 def find_buddy(journey_request: tuple):
     """
     1. Query database to find Journey Requests with ToD within 10 min of current_user's;
-    further filter to find Journey Requests with distance measures within radius of current_user's
+    further filter to find Journey Requests with distance measures within 1 mile radius of current_user's
     2. Loop over those JRs to find that with nearest lat & long for current_loc and destination
     """
 
-    username = journey_request[0][1]
-    curr_loc_lat = journey_request[0][2]
-    curr_loc_lng = journey_request[0][3]
-    destination_lat = journey_request[0][4]
-    destination_lng = journey_request[0][5]
-    tod = journey_request[0][6]
+    username = journey_request[1]
+    curr_loc_lat = journey_request[2]
+    curr_loc_lng = journey_request[3]
+    destination_lat = journey_request[4]
+    destination_lng = journey_request[5]
+    tod = journey_request[6]
 
     time = datetime.datetime.fromisoformat(tod)
-    time_window = datetime.timedelta(minutes=30)
+    time_window = datetime.timedelta(minutes=10)
     min_time = (time - time_window).isoformat()
     max_time = (time + time_window).isoformat()
 
@@ -34,7 +34,6 @@ def find_buddy(journey_request: tuple):
         destination_lng,
         username,
     )
-    print("Candidates:", candidates)
 
     user_curr_loc = (curr_loc_lat, curr_loc_lng)
     user_dest = (destination_lat, destination_lng)
@@ -50,6 +49,7 @@ def find_buddy(journey_request: tuple):
     minimum = min(totals)
     pos = totals.index(minimum)
     buddy = candidates[pos]
+    print("Buddy found!")
     return buddy
 
 
