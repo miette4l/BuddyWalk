@@ -4,6 +4,7 @@ from find_buddy import find_buddy, geocode, check_in_range, check_journey_length
 from db_utils import DB
 from route import Route, create_map
 import math
+import uuid
 
 
 app = Flask(__name__)
@@ -25,7 +26,6 @@ def user_input():
     data = request.form.to_dict()
 
     # Check for missing values
-
     missing = []
     for k, v in data.items():
         if v == "":
@@ -35,17 +35,22 @@ def user_input():
         feedback = f"Missing fields for {', '.join(missing)}"
         return render_template("form.html", feedback=feedback)
 
-    # Process data for lat, lng locations and isoformat str time
+    # Process inputted data into DB record data
+    user_id = str(uuid.uuid1())
     username = data['username']
-    curr_loc = geocode(data['CurrentLoc'])  # convert to lat, lng using gmaps.geocode
+    phone_no = data['phone_no']
+    curr_loc = geocode(data['current_loc'])  # convert to lat, lng using gmaps.geocode
     curr_loc_lat = curr_loc['lat']  # unit: latitude in degrees
     curr_loc_lng = curr_loc['lng']  # unit: longitude in degrees
     curr_loc_coords = (curr_loc_lat, curr_loc_lng)
-    destination = geocode(data['Destination'])
+    destination = geocode(data['destination'])
     destination_lat = destination['lat']
     destination_lng = destination['lng']
     dest_coords = (destination_lat, destination_lng)
-    tod = data['ToD']  # 'tod' = 'Time of Departure' as isoformat str
+    tod = data['tod']  # 'tod' = 'Time of Departure' as isoformat string
+
+    # Handle invalid phone number input
+    # <HERE>
 
     # Handle invalid location input
     # 1. check current location is in range i.e. within 10 miles of the centrepoint of London
@@ -65,16 +70,16 @@ def user_input():
     if time_given - now > time_diff:
         raise ValueError("Time of Departure too far ahead!")
 
-    # Store data as processed in dict
-    current_user = {'username': username,
-                    'curr_loc_lat': curr_loc_lat,
-                    'curr_loc_lng': curr_loc_lng,
-                    'destination_lat': destination_lat,
-                    'destination_lng': destination_lng,
-                    'tod': tod}
+    # Store data as processed in dict (changing this to DB pull)
+    # current_user = {'username': username,
+    #                 'curr_loc_lat': curr_loc_lat,
+    #                 'curr_loc_lng': curr_loc_lng,
+    #                 'destination_lat': destination_lat,
+    #                 'destination_lng': destination_lng,
+    #                 'tod': tod}
 
-    # Save data in to session for use in future routes
-    session['current_user'] = current_user  # could just pass over current user ID
+    # Save user_id to session for use in future routes
+    session['user_id'] = user_id
 
     # Convert from degrees to rads for DB storage
     curr_loc_lat = curr_loc_lat * math.pi / 180
@@ -83,15 +88,19 @@ def user_input():
     destination_lng = destination_lng * math.pi / 180
 
     # Save data to DB
-    DB.add_journey_request(username, curr_loc_lat, curr_loc_lng,
-                           destination_lat, destination_lng, tod)
+    DB.add_journey_request(
+        user_id,
+        username,
+        curr_loc_lat,
+        curr_loc_lng,
+        destination_lat,
+        destination_lng,
+        tod,
+        phone_no
+    )
 
-    #session['current_user'] = data
-    #add_journey_request(data['username'], data['CurrentLoc'], data['Destination'], data['ToD'])
-
-
+    # Redirect to result page
     return redirect(url_for('your_buddy'))
-    # do a redirect to result page
 
 
 @app.route('/yourbuddy', methods=['GET', 'POST'])
@@ -100,28 +109,34 @@ def your_buddy():
     Find and print buddy's details
     Redirect to map with route on button click
     """
-    # Prepare buddy info for buddy dict
-    buddy_journey = find_buddy(session['current_user'])
-    buddy_phone_number = "buddy's fake phone number"  # add logic for phone number
-    tod = datetime.datetime.fromisoformat(session['current_user']['tod'])
-    meeting_time = (tod + datetime.timedelta(minutes=10)).time()  # meeting time is ToD + 10 minutes
+    # Get user's journey request from DB
+    journey_request = DB.get_record(session['user_id'])
+    print("Journey request:", journey_request)
 
-    # Add meeting point logic, i.e. get_meeting_point(current_loc) or so HERE
+    # Run find_buddy() on user's JR
+    buddy_journey_request = find_buddy(journey_request)  # Stores the buddy's JR
+
+    # Prepare meeting time: ToD + 10 mins
+    tod = datetime.datetime.fromisoformat(journey_request[0][6])
+    meeting_time = (tod + datetime.timedelta(minutes=10)).time()
+
+    # Add meeting point and joint destination logic
+    # i.e. get_meeting_point(current_loc) or so HERE
     meeting_point = '140 Titwood Rd, Crossmyloof, Glasgow G41 4DA'
     joint_destination = 'Phillies of Shawlands'
 
     # Create dict for display
     buddy = {
-        'Username': buddy_journey[0],  # my own username gets returned, not my buddy's!!
-        'Phone number': buddy_phone_number,
-        'Meeting point': meeting_point,
-        'Joint destination': joint_destination,
-        'Time to meet': meeting_time
+        'Username': buddy_journey_request[1],
+        'Phone Number': buddy_journey_request[7],
+        'Meeting Point': meeting_point,
+        'Joint Destination': joint_destination,
+        'Time to Meet': meeting_time
     }
 
     if request.method == 'POST':
-        # posts session details into routing functions
-        route = Route(current_loc=buddy['Meeting point'], destination=buddy['Joint destination'])
+        # Put data into routing functions
+        route = Route(current_loc=buddy['Meeting Point'], destination=buddy['Joint Destination'])
         current_loc_coords = route.get_current_loc_coord()
         destination_coords = route.get_destination_coord()
         steps_coords = route.get_steps_coord()
