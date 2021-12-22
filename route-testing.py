@@ -2,7 +2,6 @@ from unittest import TestCase, main
 from route import Route, create_map
 import os
 
-
 current_location = 'Buchanan Galleries, Glasgow'
 destination = 'Barrowlands Ballroom Glasgow'
 
