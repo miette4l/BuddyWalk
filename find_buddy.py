@@ -6,37 +6,42 @@ import googlemaps
 gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 
 
-def find_buddy(current_user: dict):
+def find_buddy(journey_request: tuple):
     """
     1. Query database to find Journey Requests with ToD within 10 min of current_user's;
-    further filter to find Journey Requests with distance measures within radius of current_user's
+    further filter to find Journey Requests with distance measures within 1 mile radius of current_user's
     2. Loop over those JRs to find that with nearest lat & long for current_loc and destination
     """
 
-    tod = current_user['tod']
+    username = journey_request[1]
+    curr_loc_lat = journey_request[2]
+    curr_loc_lng = journey_request[3]
+    destination_lat = journey_request[4]
+    destination_lng = journey_request[5]
+    tod = journey_request[6]
+
     time = datetime.datetime.fromisoformat(tod)
-    time_window = datetime.timedelta(minutes=30)
+    time_window = datetime.timedelta(minutes=10)
     min_time = (time - time_window).isoformat()
     max_time = (time + time_window).isoformat()
 
     candidates = DB.get_matching_journeys(
         min_time,
         max_time,
-        current_user['curr_loc_lat'] * math.pi / 180,  # convert from degrees to rads to match DB
-        current_user['curr_loc_lng'] * math.pi / 180,
-        current_user['destination_lat'] * math.pi / 180,
-        current_user['destination_lng'] * math.pi / 180,
-        current_user['username']
+        curr_loc_lat,
+        curr_loc_lng,
+        destination_lat,
+        destination_lng,
+        username,
     )
-    print("Candidates:", candidates)
 
-    user_curr_loc = (current_user['curr_loc_lat'], current_user['curr_loc_lng'])
-    user_dest = (current_user['destination_lat'], current_user['destination_lng'])
+    user_curr_loc = (curr_loc_lat, curr_loc_lng)
+    user_dest = (destination_lat, destination_lng)
 
     totals = []
     for i, candidate in enumerate(candidates):
-        candidate_curr_loc = (candidate[1] * 180 / math.pi, candidate[2] * 180 / math.pi)
-        candidate_dest = (candidate[3] * 180 / math.pi, candidate[4] * 180 / math.pi)
+        candidate_curr_loc = (candidate[2] * 180 / math.pi, candidate[3] * 180 / math.pi)
+        candidate_dest = (candidate[4] * 180 / math.pi, candidate[5] * 180 / math.pi)
         starting_distance = haversine(user_curr_loc, candidate_curr_loc, unit=Unit.MILES)
         dest_distance = haversine(user_dest, candidate_dest, unit=Unit.MILES)
         total = starting_distance + dest_distance
@@ -44,6 +49,7 @@ def find_buddy(current_user: dict):
     minimum = min(totals)
     pos = totals.index(minimum)
     buddy = candidates[pos]
+    print("Buddy found!")
     return buddy
 
 
