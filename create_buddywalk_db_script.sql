@@ -83,7 +83,8 @@ CurrentLocLng DOUBLE (33, 30) NOT NULL,
 DestinationLat DOUBLE (33, 30) NOT NULL,
 DestinationLng DOUBLE (33, 30) NOT NULL,
 ToD VARCHAR (50) NOT NULL,
-phone_number VARCHAR(50) NOT NULL
+phone_number VARCHAR(50) NOT NULL,
+matched VARCHAR(10) DEFAULT 'False'
 );
 
 Create table matches (

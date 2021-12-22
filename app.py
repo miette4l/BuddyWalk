@@ -70,14 +70,6 @@ def user_input():
     if time_given - now > time_diff:
         raise ValueError("Time of Departure too far ahead!")
 
-    # Store data as processed in dict (changing this to DB pull)
-    # current_user = {'username': username,
-    #                 'curr_loc_lat': curr_loc_lat,
-    #                 'curr_loc_lng': curr_loc_lng,
-    #                 'destination_lat': destination_lat,
-    #                 'destination_lng': destination_lng,
-    #                 'tod': tod}
-
     # Save user_id to session for use in future routes
     session['user_id'] = user_id
 
@@ -114,15 +106,19 @@ def your_buddy():
     print("User's Journey request:", journey_request)
 
     # Run find_buddy() on user's JR
-    buddy_journey_request = find_buddy(journey_request)  # Stores the buddy's JR
+    buddy_journey_request = find_buddy(journey_request)
+
+    if not buddy_journey_request:
+        return redirect(url_for('search_page'))
+
     print("Buddy's Journey request:", buddy_journey_request)
     print("Buddies:", journey_request[1], "and", buddy_journey_request[1])
 
     # Add match in DB
     DB.add_match(journey_request, buddy_journey_request)
 
-    # Delete JRs from DB so matched users will no longer appear in other users' searches
-    DB.delete_matched_journeys(journey_request, buddy_journey_request)
+    # Update JRs from DB so matched journeys have matched=True
+    DB.update_matched_journeys(journey_request, buddy_journey_request)
 
     # Prepare meeting time: ToD + 10 mins
     tod = datetime.datetime.fromisoformat(journey_request[6])
@@ -153,6 +149,62 @@ def your_buddy():
         return redirect(url_for('show_map'))
 
     return render_template('your_buddy.html', buddy=buddy)
+
+
+@app.route('/searching', methods=['GET'])
+def search_page():
+    """Render the button"""
+    return render_template('button.html')
+
+
+@app.route('/searching', methods=['GET', 'POST'])
+def no_instant_match():
+    """
+    When no match is found, display 'searching' page.
+    Here, user can check on if they've been matched.
+    """
+    user_id = session['user_id']
+
+    if request.method == 'POST':
+        if request.form.get('check') == 'Check':
+            print("You've successfully got here")
+            try:
+                match = DB.get_match(user_id)
+                print(match)
+                print(user_id)
+                print(list(match))
+                buddy_id = list(match)
+                buddy_id.remove(user_id)
+                print(buddy_id)
+                buddy_journey_request = get_record(buddy_id[0])
+                print(buddy_journey_request)
+                # Get user's journey request from DB
+                journey_request = DB.get_record(session['user_id'])
+                print(journey_request)
+
+                # Prepare meeting time: ToD + 10 mins
+                tod = datetime.datetime.fromisoformat(journey_request[6])
+                meeting_time = (tod + datetime.timedelta(minutes=10)).time()
+
+                # Add meeting point and joint destination logic
+                # i.e. get_meeting_point(current_loc) or so HERE
+                meeting_point = '140 Titwood Rd, Crossmyloof, Glasgow G41 4DA'
+                joint_destination = 'Phillies of Shawlands'
+
+                # Create dict for display
+                buddy = {
+                    'Username': buddy_journey_request[1],
+                    'Phone Number': buddy_journey_request[7],
+                    'Meeting Point': meeting_point,
+                    'Joint Destination': joint_destination,
+                    'Time to Meet': meeting_time
+                }
+
+                return render_template('your_buddy.html', buddy=buddy)
+
+            except:
+                print("Something went wrong")
+                return redirect(url_for('search_page'))
 
 
 @app.route('/yourmap', methods=['GET'])

@@ -127,6 +127,8 @@ class DB:
         AND
         user_username != @username
         AND
+        matched = 'False'
+        AND
         @R * SQRT(POWER((CurrentLocLat - @curr_loc_lat), 2) + POWER(COS((CurrentLocLat + @curr_loc_lat) / 2)*(CurrentLocLng - @curr_loc_lng), 2)) < @D
         AND
         @R * SQRT(POWER((DestinationLat - @curr_dest_lat), 2) + POWER(COS((DestinationLat + @curr_dest_lat) / 2)*(DestinationLng - @curr_dest_lng), 2)) < @D;
@@ -150,7 +152,7 @@ class DB:
             for i in result:
                 print(i)
         else:
-            raise Exception("No Match Found.")
+            return False
         cursor.close()
 
         return result
@@ -198,14 +200,15 @@ class DB:
             raise DBConnectionError('Failed to read the database')
 
     @staticmethod
-    def delete_matched_journeys(journey_request, buddy_journey_request):
+    def update_matched_journeys(journey_request, buddy_journey_request):
         db_connection = None
         try:
             db_name = "BuddyWalk"
             db_connection = DB._connect_to_db(db_name)
             cursor = db_connection.cursor()
             query = """
-            DELETE FROM BuddyWalk.journey_requests
+            UPDATE BuddyWalk.journey_requests
+            SET matched = 'True'
             WHERE
             user_id = %s
             OR
@@ -214,8 +217,33 @@ class DB:
             values = (journey_request[0], buddy_journey_request[0])
             cursor.execute(query, values)
             db_connection.commit()
-            print(cursor.rowcount, "records successfully deleted from Journey Requests table.")
+            print(cursor.rowcount, "records successfully updated in Journey Requests table.")
             cursor.close()
 
         except Exception:
             raise DBConnectionError('Failed to read the database')
+
+    @staticmethod
+    def get_match(user_id):
+
+        try:
+            db_name = "BuddyWalk"
+            db_connection = DB._connect_to_db(db_name)
+            cursor = db_connection.cursor()
+        except Exception:
+            raise DBConnectionError('Failed to read the database')
+
+        query = """
+        SELECT * FROM BuddyWalk.matches
+        WHERE
+        user_id_1 = %s
+        OR
+        user_id_2 = %s
+        """
+        cursor.execute(query, (user_id, user_id))
+        result = cursor.fetchall()[0]
+        print(cursor.rowcount, "record found in Matches table.")
+        if not result:
+            return False
+        cursor.close()
+        return result

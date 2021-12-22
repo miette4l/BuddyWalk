@@ -35,6 +35,9 @@ def find_buddy(journey_request: tuple):
         username,
     )
 
+    if not candidates:
+        return False
+
     user_curr_loc = (curr_loc_lat, curr_loc_lng)
     user_dest = (destination_lat, destination_lng)
 
