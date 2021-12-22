@@ -118,12 +118,6 @@ def your_buddy():
     print("Buddy's Journey request:", buddy_journey_request)
     print("Buddies:", journey_request[1], "and", buddy_journey_request[1])
 
-    # Add match in DB
-    DB.add_match(journey_request, buddy_journey_request)
-
-    # Delete JRs from DB so matched users will no longer appear in other users' searches
-    DB.delete_matched_journeys(journey_request, buddy_journey_request)
-
     # Prepare meeting time: ToD + 10 mins
     tod = datetime.datetime.fromisoformat(journey_request[6])
     meeting_time = (tod + datetime.timedelta(minutes=10)).time()
@@ -143,6 +137,11 @@ def your_buddy():
     }
 
     if request.method == 'POST':
+        # Add match in DB
+        DB.add_match(journey_request, buddy_journey_request)
+
+        # Delete JRs from DB so matched users will no longer appear in other users' searches
+        DB.delete_matched_journeys(journey_request, buddy_journey_request)
         # Put data into routing functions
         route = Route(current_loc=buddy['Meeting Point'], destination=buddy['Joint Destination'])
         current_loc_coords = route.get_current_loc_coord()
