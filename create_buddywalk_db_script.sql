@@ -4,7 +4,7 @@ use BuddyWalk;
 
 -- The below tables 'user_details' and 'user_login' were created for registration and login
 -- These functionalities have not been added in current version.
---
+
 -- Create table user_details (
 -- user_ID INTEGER NOT NULL,
 -- first_name VARCHAR (50) NOT NULL,
@@ -48,7 +48,6 @@ use BuddyWalk;
 -- (018, 'Sacha', 'Esmailji', '8_Halefield_Road', 'London', 'N179XR', '7658427', 'sesmailji@googlemail.com'),
 -- (019, 'Elouise', 'Odetola', '74_Lordship_Lane', 'London', 'SE228HF', '7865885', 'eodetola@gmail.com'),
 -- (020, 'Iben', 'Holden', '3_Percy_Street', 'London', 'W1T1DE', '7638986', 'iholden@hotmail.com')
--- ;
 --
 -- INSERT INTO user_login
 -- (user_ID, user_username, user_password)
