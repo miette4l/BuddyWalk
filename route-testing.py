@@ -1,5 +1,5 @@
 from unittest import TestCase, main
-from route import Route, create_map
+from route import Route, create_map, meeting_point
 import os
 
 current_location = 'Buchanan Galleries, Glasgow'
@@ -33,10 +33,15 @@ class RouteTest(TestCase):
     def test_create_map(self):
         """tests generation of f_map.html"""
         test_route = Route(current_loc=current_location, destination=destination)
-        result = create_map(test_route.get_current_loc_coord(), test_route.get_destination_coord(),
+        create_map(test_route.get_current_loc_coord(), test_route.get_destination_coord(),
                             test_route.get_steps_coord())
         expected_path = "f_map.html"
         assert os.path.isfile(expected_path)
+
+    # def test_meeting_point(self):
+    #     expected = (55.85955035, 25.80141815)
+    #     result = meeting_point(current_location, destination)
+    #     self.assertEqual(expected, result)
 
 
 if __name__ == '__main__':
