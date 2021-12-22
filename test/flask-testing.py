@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from app import *
 from unittest import mock
@@ -22,20 +23,22 @@ class FlaskTestCase(unittest.TestCase):
     def test_user_input_path(self):
         with self.app:
             response = self.app.post("/",
-                                     data={"username": "test_user",
-                                           "CurrentLoc": "12 Bolton Drive, Glasgow",
-                                           "Destination": "Phillies of Shawlands",
-                                           "ToD": "15:13"},
+                                     data={"username": "test_user1",
+                                           "phone_no": "07305271297",
+                                           "current_loc": "trafalgar square, London",
+                                           "destination": "st paul's cathedral london",
+                                           "tod": str((datetime.datetime.now() + datetime.timedelta(minutes=10)).isoformat())},
                                      follow_redirects=True)
             # check that the path changed
             assert request.path == url_for('your_buddy')
 
     # check if buddys data is displayed in '/yourbuddy' when GET method
     def test_your_buddy_get(self):
-        user_data = {"username": "test_user",
-                "CurrentLoc": "12 Bolton Drive, Glasgow",
-                "Destination": "Phillies of Shawlands",
-                "ToD": "15:13"}
+        user_data = {"username": "test_user2",
+                     "phone_no": "07305271297",
+                     "current_loc": "trafalgar square, London",
+                     "destination": "st paul's cathedral london",
+                     "tod": str((datetime.datetime.now() + datetime.timedelta(minutes=10)).isoformat())}
         with self.app:
             with self.app.session_transaction() as sess:
                 sess['current_user'] = user_data
@@ -52,10 +55,11 @@ class FlaskTestCase(unittest.TestCase):
 
     # test '/yourbuddy' redirect to map when POST
     def test_your_buddy_post(self):
-        user_data = {"username": "test_user",
-                "CurrentLoc": "12 Bolton Drive, Glasgow",
-                "Destination": "Phillies of Shawlands",
-                "ToD": "15:13"}
+        user_data = {"username": "test_user1",
+                     "phone_no": "07305271297",
+                     "current_loc": "trafalgar square, London",
+                     "destination": "st paul's cathedral london",
+                     "tod": str((datetime.datetime.now() + datetime.timedelta(minutes=10)).isoformat())}
         with self.app:
             with self.app.session_transaction() as sess:
                 sess['current_user'] = user_data
