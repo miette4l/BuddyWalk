@@ -2,7 +2,7 @@ import datetime
 import math
 import uuid
 
-from location_utils import geocode, midpoint
+from utils.location_utils import geocode, midpoint
 
 
 def process_input(data: dict) -> dict:
