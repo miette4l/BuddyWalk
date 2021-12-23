@@ -158,58 +158,55 @@ def search_page():
     return render_template('check.html')
 
 
-@app.route('/searching', methods=['GET', 'POST'])
+@app.route('/searching', methods=['POST'])
 def no_instant_match():
     """
     When no match is found, display 'searching' page.
     Here, user can check on if they've been matched.
     """
+    if request.form['check'] == 'Check':
 
-    if request.method == 'POST':
-        if request.form['check'] == 'Check':
+        user_id = session['user_id']
+        try:
+            match = DB.get_match(user_id)
+        except:
+            return redirect(url_for('search_page'))
 
-            user_id = session['user_id']
-            try:
-                match = DB.get_match(user_id)
-            except:
-                return redirect(url_for('search_page'))
+        else:
 
-            else:
+            # Extract buddy's ID from match record
+            buddy_id = [match[0], match[1]]
+            buddy_id.remove(user_id)  # This is cause we don't know which column is buddy_id and which is user_id
 
-                # Extract buddy's ID from match record
-                buddy_id = [match[0], match[1]]
-                buddy_id.remove(user_id)  # This is cause we don't know which column is buddy_id and which is user_id
+            # Get buddy's jr from DB
+            buddy_jr = DB.get_record(buddy_id[0])
+            buddy = record_to_dict(buddy_jr)
 
-                # Get buddy's jr from DB
-                buddy_jr = DB.get_record(buddy_id[0])
-                buddy = record_to_dict(buddy_jr)
+            # Get user's jr from DB
+            jr = DB.get_record(session['user_id'])
+            user = record_to_dict(jr)
 
-                # Get user's jr from DB
-                jr = DB.get_record(session['user_id'])
-                user = record_to_dict(jr)
+            # Get pre-calculated match details from match record
+            meeting_point = json.loads(match[2])
+            joint_destination = json.loads(match[3])
+            meeting_time = match[4]
 
-                # Get pre-calculated match details from match record
-                meeting_point = json.loads(match[2])
-                joint_destination = json.loads(match[3])
-                meeting_time = match[4]
+            buddy_display = buddy_results(user, buddy, meeting_point, joint_destination, meeting_time)
 
-                buddy_display = buddy_results(user, buddy, meeting_point, joint_destination, meeting_time)
-
-                return render_template('your_buddy.html', buddy=buddy_display)
+            return render_template('your_buddy.html', buddy=buddy_display)
 
 
-@app.route('/searching', methods=['GET', 'POST'])
+@app.route('/searching', methods=['POST'])
 def delayed_map():
-    if request.method == 'POST':
-        if request.form['show_map'] == 'Show Map':
-            # Put data into routing functions
-            route = Route(current_loc=meeting_point['coords'], destination=joint_destination['coords'])
-            current_loc_coords = route.get_current_loc_coord()
-            destination_coords = route.get_destination_coord()
-            steps_coords = route.get_steps_coord()
-            create_map(current_loc_coords, destination_coords, steps_coords)
+    if request.form['show_map'] == 'Show Map':
+        # Put data into routing functions
+        route = Route(current_loc=meeting_point['coords'], destination=joint_destination['coords'])
+        current_loc_coords = route.get_current_loc_coord()
+        destination_coords = route.get_destination_coord()
+        steps_coords = route.get_steps_coord()
+        create_map(current_loc_coords, destination_coords, steps_coords)
 
-        return redirect(url_for('show_map'))
+    return redirect(url_for('show_map'))
 
 
 @app.route('/yourmap', methods=['GET'])
