@@ -1,21 +1,27 @@
-import googlemaps
 import math
+
+import googlemaps
 from haversine import haversine, Unit
 
 gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 
 
 def geocode(loc: str) -> tuple:
+    """
+    Turn a location string into a gmaps geocode response
+    """
     geocoded = gmaps.geocode(loc)[0]['geometry']['location']
     return geocoded
 
 
 def degrees_to_rads(degrees: float) -> float:
+    """Convert from degrees to radians"""
     rads = degrees * math.pi / 180
     return rads
 
 
 def rads_to_degrees(rads: float) -> float:
+    """Convert from radians to  degrees"""
     degrees = rads * 180 / math.pi
     return degrees
 
@@ -31,7 +37,7 @@ def midpoint(location1, location2) -> dict:
         loc1_lat = loc1['lat']
         loc1_lng = loc1['lng']
         loc2_lat = loc2['lat']
-        loc2_lng = loc2['lat']
+        loc2_lng = loc2['lng']
 
     elif isinstance(location1, tuple):
         # if location are already tuples (lat, lng) execute this
@@ -56,6 +62,9 @@ def midpoint(location1, location2) -> dict:
 
 
 def check_in_range(curr_loc_coords: tuple, range_d=10) -> bool:
+    """
+    Check location inputs are within range of London
+    """
     london = (51.509865, -0.118092)  # app is currently only for London use
     curr_loc_coords = (float(val) for val in curr_loc_coords)
     distance = haversine(curr_loc_coords, london, unit=Unit.MILES)
@@ -65,6 +74,9 @@ def check_in_range(curr_loc_coords: tuple, range_d=10) -> bool:
 
 
 def check_journey_length(curr_loc_coords: tuple, dest_coords: tuple, journey_len=10) -> bool:
+    """
+    Check the journey length is short enough to walk
+    """
     curr_loc_coords = (float(val) for val in curr_loc_coords)
     dest_coords = (float(val) for val in dest_coords)
     distance = haversine(curr_loc_coords, dest_coords, unit=Unit.MILES)

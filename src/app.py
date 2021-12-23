@@ -8,8 +8,8 @@ from app_utils import match_details, buddy_results, record_to_dict, process_inpu
 from db.db_utils import DB
 from find_buddy import find_buddy
 from flask import Flask, request, render_template, redirect, url_for, session, send_file
-from route import Route, create_map
 from location_utils import geocode, midpoint, check_in_range, check_journey_length, rads_to_degrees, degrees_to_rads
+from route import Route, create_map
 
 app = Flask(__name__)
 app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
