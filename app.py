@@ -168,9 +168,9 @@ def no_instant_match():
         if request.form['check'] == 'Check':
 
             user_id = session['user_id']
-            match = DB.get_match(user_id)
-
-            if not match:
+            try:
+                match = DB.get_match(user_id)
+            except:
                 return redirect(url_for('search_page'))
 
             else:
