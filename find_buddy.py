@@ -52,7 +52,7 @@ def find_buddy(journey_request: tuple):
     minimum = min(totals)
     pos = totals.index(minimum)
     buddy = candidates[pos]
-    print("Buddy found!")
+    print("Buddy found!:", buddy[1])
     return buddy
 
 

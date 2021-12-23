@@ -87,7 +87,13 @@ phone_number VARCHAR(50) NOT NULL,
 matched VARCHAR(10) DEFAULT 'False'
 );
 
+alter table BuddyWalk.journey_requests
+CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;
+
 Create table matches (
 user_id_1 VARCHAR(50) NOT NULL,
-user_id_2 VARCHAR(50) NOT NULL
+user_id_2 VARCHAR(50) NOT NULL,
+meeting_point VARCHAR(250) NOT NULL,
+joint_destination VARCHAR(250) NOT NULL,
+meeting_time VARCHAR(50) NOT NULL
 );
