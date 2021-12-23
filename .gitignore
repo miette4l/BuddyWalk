@@ -128,11 +128,12 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Added by Hollys
+# Added by Holly
 .DS_Store
 .idea/
-__pycache__
+__pycache__/
 config.py
+.src/templates/config.py
 
 # Added by Verena
 f_map.html
