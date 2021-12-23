@@ -45,3 +45,8 @@ The video below demonstrates the process of how the app would work for two diffe
 
 BuddyWalk Demo Video
 --------------------
+
+Credits
+-------
+
+BuddyWalk was created by Verena Tiede, Claudia Bridgens, Holly Farler and Aishah Hussain.
