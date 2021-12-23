@@ -2,6 +2,9 @@ from pprint import pprint as pp
 
 import folium
 import googlemaps
+from haversine import haversine, Unit
+
+gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 
 
 class Route:
@@ -9,11 +12,12 @@ class Route:
     def __init__(self, current_loc, destination):
         self.current_loc = current_loc
         self.destination = destination
+        self.current_location_coord = None
+        self.destination_coord = None
+        self.steps = None
 
         # initialise googlemaps client and call response
-        API_KEY = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
-        map_client = googlemaps.Client(API_KEY)
-        self.response = map_client.directions(current_loc, destination, mode='walking')
+        self.response = gmaps.directions(current_loc, destination, mode='walking')
 
     def get_current_loc_coord(self):
         """get latitude and longitude for current location"""
