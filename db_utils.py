@@ -188,7 +188,7 @@ class DB:
             raise DBConnectionError('Failed to get Journey Request record')
 
     @staticmethod
-    def add_match(journey_request: tuple, buddy_journey_request: tuple) -> None:
+    def add_match(user_id, buddy_id, meeting_point, joint_destination, meeting_time) -> None:
 
         try:
             db_name = "BuddyWalk"
@@ -197,11 +197,11 @@ class DB:
 
             query = """
             INSERT INTO BuddyWalk.matches
-            (user_id_1, user_id_2)
-            VALUES (%s, %s)
+            (user_id_1, user_id_2, meeting_point, joint_destination, meeting_time)
+            VALUES (%s, %s, %s, %s, %s)
             """
 
-            values = (journey_request[0], buddy_journey_request[0])
+            values = (user_id, buddy_id, meeting_point, joint_destination, meeting_time)
             cursor.execute(query, values)
             db_connection.commit()
             print(cursor.rowcount, "record successfully inserted into Matches table.")
@@ -255,6 +255,7 @@ class DB:
 
             cursor.execute(query, (user_id, user_id))
             result = cursor.fetchall()[0]
+            print(result)
             if cursor.rowcount:
                 print(cursor.rowcount, "record found in Matches table.")
             cursor.close()
