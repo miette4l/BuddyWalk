@@ -38,11 +38,6 @@ class RouteTest(TestCase):
         expected_path = "f_map.html"
         assert os.path.isfile(expected_path)
 
-    # def test_meeting_point(self):
-    #     expected = (55.85955035, 25.80141815)
-    #     result = meeting_point(current_location, destination)
-    #     self.assertEqual(expected, result)
-
 
 if __name__ == '__main__':
     main()
