@@ -6,7 +6,7 @@ import uuid
 import haversine
 from app_utils import match_details, buddy_results, record_to_dict, geocode, process_input, check_in_range, \
     check_journey_length, check_time_input, rads_to_degrees, degrees_to_rads, get_meeting_time, midpoint
-from db_utils import DB
+from db.db_utils import DB
 from find_buddy import find_buddy
 from flask import Flask, request, render_template, redirect, url_for, session, send_file
 from route import Route, create_map

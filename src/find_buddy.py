@@ -2,7 +2,7 @@ import datetime
 import math
 
 import googlemaps
-from db_utils import DB
+from db.db_utils import DB
 from haversine import haversine, Unit
 
 gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
