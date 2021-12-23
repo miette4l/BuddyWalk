@@ -35,6 +35,9 @@ def find_buddy(journey_request: tuple):
         username,
     )
 
+    if not candidates:
+        return False
+
     user_curr_loc = (curr_loc_lat, curr_loc_lng)
     user_dest = (destination_lat, destination_lng)
 
@@ -53,24 +56,4 @@ def find_buddy(journey_request: tuple):
     return buddy
 
 
-def geocode(loc: str) -> tuple:
-    geocoded = gmaps.geocode(loc)[0]['geometry']['location']
-    return geocoded
 
-
-def check_in_range(curr_loc_coords: tuple) -> bool:
-    london = (51.509865, -0.118092)
-    curr_loc_coords = (float(val) for val in curr_loc_coords)
-    distance = haversine(curr_loc_coords, london, unit=Unit.MILES)
-    if distance < 10:
-        return True
-    return False
-
-
-def check_journey_length(curr_loc_coords: tuple, dest_coords: tuple) -> bool:
-    curr_loc_coords = (float(val) for val in curr_loc_coords)
-    dest_coords = (float(val) for val in dest_coords)
-    distance = haversine(curr_loc_coords, dest_coords, unit=Unit.MILES)
-    if distance < 10:
-        return True
-    return False

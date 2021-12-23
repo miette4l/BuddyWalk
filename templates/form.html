@@ -2,13 +2,11 @@
 <head>
 </head>
 <body>
-<!--{% for question in questions %}
-    {{question.name}}: {{question.question}}<br>
-{% endfor %}-->
+
 <form action="/" method="POST">
 <p>WELCOME TO BUDDYWALK!</p>
     <p>Username <input type = "text" name = "username" /></p>
-    <p>Phone Number <input type="text" name = "phone_no" /></p>
+    <p>Phone Number <input type="number" name = "phone_no" /></p>
     <p>Current Location <input type = "text" name = "current_loc" /></p>
     <p>Destination <input type = "text" name = "destination" /></p>
     <p>Time of Departure <input type = "datetime-local" name = "tod" /></p>
@@ -17,3 +15,5 @@
     <p class="text-danger float-right">{{ feedback }}</p>
     {% endif %}
 </form>
+
+</body>
