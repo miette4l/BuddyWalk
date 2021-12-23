@@ -1,8 +1,10 @@
-from db_utils import DB
 import datetime
-from haversine import haversine, Unit
 import math
+
 import googlemaps
+from db.db_utils import DB
+from haversine import haversine, Unit
+
 gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 
 
@@ -13,6 +15,7 @@ def find_buddy(journey_request: tuple):
     2. Loop over those JRs to find that with nearest lat & long for current_loc and destination
     """
 
+    # parse journey request into arguments for DB.get_matching_journeys()
     username = journey_request[1]
     curr_loc_lat = journey_request[2]
     curr_loc_lng = journey_request[3]
@@ -20,11 +23,13 @@ def find_buddy(journey_request: tuple):
     destination_lng = journey_request[5]
     tod = journey_request[6]
 
+    # create max and min time values
     time = datetime.datetime.fromisoformat(tod)
     time_window = datetime.timedelta(minutes=10)
     min_time = (time - time_window).isoformat()
     max_time = (time + time_window).isoformat()
 
+    # get matching journeys from db
     candidates = DB.get_matching_journeys(
         min_time,
         max_time,
@@ -38,9 +43,11 @@ def find_buddy(journey_request: tuple):
     if not candidates:
         return False
 
+    # create lat, lng location tuples
     user_curr_loc = (curr_loc_lat, curr_loc_lng)
     user_dest = (destination_lat, destination_lng)
 
+    # find candidate with nearest current location and destination to user's
     totals = []
     for i, candidate in enumerate(candidates):
         candidate_curr_loc = (candidate[2] * 180 / math.pi, candidate[3] * 180 / math.pi)
@@ -54,6 +61,3 @@ def find_buddy(journey_request: tuple):
     buddy = candidates[pos]
     print("Buddy found!:", buddy[1])
     return buddy
-
-
-

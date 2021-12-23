@@ -1,14 +1,16 @@
-from flask import Flask, request, render_template, redirect, url_for, session, send_file
 import datetime
-from find_buddy import find_buddy
-from db_utils import DB
-from route import Route, create_map
+import json
 import math
 import uuid
-from app_utils import match_details, buddy_results, record_to_dict, geocode, process_input, check_in_range, check_journey_length, check_time_input, rads_to_degrees, degrees_to_rads, get_meeting_time, midpoint
-import haversine
-import json
 
+from db.db_utils import DB
+from flask import Flask, request, render_template, redirect, url_for, session, send_file
+from utils.app_utils import match_details, buddy_results, record_to_dict, process_input, \
+    check_time_input, get_meeting_time
+from utils.find_buddy import find_buddy
+from utils.location_utils import geocode, midpoint, check_in_range, check_journey_length, rads_to_degrees, \
+    degrees_to_rads
+from utils.route import Route, create_map
 
 app = Flask(__name__)
 app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
@@ -17,7 +19,7 @@ app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
 @app.route('/', methods=['GET'])
 def display_form():
     """Render the form"""
-    return render_template('form.html')
+    return render_template('user_input.html')
 
 
 @app.route('/', methods=['POST'])
@@ -37,7 +39,7 @@ def user_input():
 
     if missing:
         feedback = f"Missing fields for {', '.join(missing)}"
-        return render_template("form.html", feedback=feedback)
+        return render_template("user_input.html", feedback=feedback)
 
     # Process inputted data into DB record data
     user = process_input(data)
@@ -154,61 +156,58 @@ def your_buddy():
 @app.route('/searching', methods=['GET'])
 def search_page():
     """Render the page"""
-    return render_template('button.html')
+    return render_template('check.html')
 
 
-@app.route('/searching', methods=['GET', 'POST'])
+@app.route('/searching', methods=['POST'])
 def no_instant_match():
     """
     When no match is found, display 'searching' page.
     Here, user can check on if they've been matched.
     """
+    if request.form['check'] == 'Check':
 
-    if request.method == 'POST':
-        if request.form['check'] == 'Check':
+        user_id = session['user_id']
+        try:
+            match = DB.get_match(user_id)
+        except:
+            return redirect(url_for('search_page'))
 
-            user_id = session['user_id']
-            try:
-                match = DB.get_match(user_id)
-            except:
-                return redirect(url_for('search_page'))
+        else:
 
-            else:
+            # Extract buddy's ID from match record
+            buddy_id = [match[0], match[1]]
+            buddy_id.remove(user_id)  # This is cause we don't know which column is buddy_id and which is user_id
 
-                # Extract buddy's ID from match record
-                buddy_id = [match[0], match[1]]
-                buddy_id.remove(user_id)  # This is cause we don't know which column is buddy_id and which is user_id
+            # Get buddy's jr from DB
+            buddy_jr = DB.get_record(buddy_id[0])
+            buddy = record_to_dict(buddy_jr)
 
-                # Get buddy's jr from DB
-                buddy_jr = DB.get_record(buddy_id[0])
-                buddy = record_to_dict(buddy_jr)
+            # Get user's jr from DB
+            jr = DB.get_record(session['user_id'])
+            user = record_to_dict(jr)
 
-                # Get user's jr from DB
-                jr = DB.get_record(session['user_id'])
-                user = record_to_dict(jr)
+            # Get pre-calculated match details from match record
+            meeting_point = json.loads(match[2])
+            joint_destination = json.loads(match[3])
+            meeting_time = match[4]
 
-                # Get pre-calculated match details from match record
-                meeting_point = json.loads(match[2])
-                joint_destination = json.loads(match[3])
-                meeting_time = match[4]
+            buddy_display = buddy_results(user, buddy, meeting_point, joint_destination, meeting_time)
 
-                buddy_display = buddy_results(user, buddy, meeting_point, joint_destination, meeting_time)
-
-                return render_template('your_buddy.html', buddy=buddy_display)
+            return render_template('your_buddy.html', buddy=buddy_display)
 
 
-@app.route('/searching', methods=['GET', 'POST'])
+@app.route('/searching', methods=['POST'])
 def delayed_map():
-    if request.method == 'POST':
-        if request.form['show_map'] == 'Show Map':
-            # Put data into routing functions
-            route = Route(current_loc=meeting_point['coords'], destination=joint_destination['coords'])
-            current_loc_coords = route.get_current_loc_coord()
-            destination_coords = route.get_destination_coord()
-            steps_coords = route.get_steps_coord()
-            create_map(current_loc_coords, destination_coords, steps_coords)
+    if request.form['show_map'] == 'Show Map':
+        # Put data into routing functions
+        route = Route(current_loc=meeting_point['coords'], destination=joint_destination['coords'])
+        current_loc_coords = route.get_current_loc_coord()
+        destination_coords = route.get_destination_coord()
+        steps_coords = route.get_steps_coord()
+        create_map(current_loc_coords, destination_coords, steps_coords)
 
-        return redirect(url_for('show_map'))
+    return redirect(url_for('show_map'))
 
 
 @app.route('/yourmap', methods=['GET'])
