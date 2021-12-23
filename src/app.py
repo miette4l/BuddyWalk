@@ -1,14 +1,15 @@
-from flask import Flask, request, render_template, redirect, url_for, session, send_file
 import datetime
-from find_buddy import find_buddy
-from db_utils import DB
-from route import Route, create_map
+import json
 import math
 import uuid
-from app_utils import match_details, buddy_results, record_to_dict, geocode, process_input, check_in_range, check_journey_length, check_time_input, rads_to_degrees, degrees_to_rads, get_meeting_time, midpoint
-import haversine
-import json
 
+import haversine
+from app_utils import match_details, buddy_results, record_to_dict, geocode, process_input, check_in_range, \
+    check_journey_length, check_time_input, rads_to_degrees, degrees_to_rads, get_meeting_time, midpoint
+from db_utils import DB
+from find_buddy import find_buddy
+from flask import Flask, request, render_template, redirect, url_for, session, send_file
+from route import Route, create_map
 
 app = Flask(__name__)
 app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
@@ -17,7 +18,7 @@ app.secret_key = 'AIzaSyC6ShfxX_32v448NTO_xj-J9Wit9kNSLyg'
 @app.route('/', methods=['GET'])
 def display_form():
     """Render the form"""
-    return render_template('form.html')
+    return render_template('user_input.html')
 
 
 @app.route('/', methods=['POST'])
@@ -37,7 +38,7 @@ def user_input():
 
     if missing:
         feedback = f"Missing fields for {', '.join(missing)}"
-        return render_template("form.html", feedback=feedback)
+        return render_template("user_input.html", feedback=feedback)
 
     # Process inputted data into DB record data
     user = process_input(data)
@@ -154,7 +155,7 @@ def your_buddy():
 @app.route('/searching', methods=['GET'])
 def search_page():
     """Render the page"""
-    return render_template('button.html')
+    return render_template('check.html')
 
 
 @app.route('/searching', methods=['GET', 'POST'])

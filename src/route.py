@@ -1,6 +1,7 @@
-import googlemaps
-import folium
 from pprint import pprint as pp
+
+import folium
+import googlemaps
 
 
 class Route:
@@ -58,19 +59,3 @@ def create_map(current_location_coord, destination_coord, steps_coord):
     html_page = 'f_map.html'
     # save map to html file
     f_map.save(html_page)
-
-
-if __name__ == '__main__':
-    # replace with logic
-    current_location = '12 Bolton Drive, Glasgow, G42 9DY'
-    destination = 'Philies of Shwland'
-
-    # create route from Route class.
-    route = Route(current_location, destination)
-
-    # get current location, destination and steps coordinates from Route object
-    current_location_coord = route.get_current_loc_coord()
-    destination_coord = route.get_destination_coord()
-    steps_coord = route.get_steps_coord()
-
-    create_map(current_location_coord, destination_coord, steps_coord)

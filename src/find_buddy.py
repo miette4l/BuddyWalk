@@ -1,8 +1,10 @@
-from db_utils import DB
 import datetime
-from haversine import haversine, Unit
 import math
+
 import googlemaps
+from db_utils import DB
+from haversine import haversine, Unit
+
 gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 
 
@@ -54,6 +56,3 @@ def find_buddy(journey_request: tuple):
     buddy = candidates[pos]
     print("Buddy found!:", buddy[1])
     return buddy
-
-
-

@@ -1,8 +1,10 @@
-import uuid
-import math
-import googlemaps
 import datetime
+import math
+import uuid
+
+import googlemaps
 from haversine import haversine, Unit
+
 gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
 
 
