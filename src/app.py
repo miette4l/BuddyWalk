@@ -165,36 +165,38 @@ def no_instant_match():
     When no match is found, display 'searching' page.
     Here, user can check on if they've been matched.
     """
-    if request.form['check'] == 'Check':
 
-        user_id = session['user_id']
-        try:
-            match = DB.get_match(user_id)
-        except:
-            return redirect(url_for('search_page'))
+    if request.method == 'POST':
+        if request.form['check'] == 'Check':
 
-        else:
+            user_id = session['user_id']
+            try:
+                match = DB.get_match(user_id)
+            except:
+                return redirect(url_for('search_page'))
 
-            # Extract buddy's ID from match record
-            buddy_id = [match[0], match[1]]
-            buddy_id.remove(user_id)  # This is cause we don't know which column is buddy_id and which is user_id
+            else:
 
-            # Get buddy's jr from DB
-            buddy_jr = DB.get_record(buddy_id[0])
-            buddy = record_to_dict(buddy_jr)
+                # Extract buddy's ID from match record
+                buddy_id = [match[0], match[1]]
+                buddy_id.remove(user_id)  # This is cause we don't know which column is buddy_id and which is user_id
 
-            # Get user's jr from DB
-            jr = DB.get_record(session['user_id'])
-            user = record_to_dict(jr)
+                # Get buddy's jr from DB
+                buddy_jr = DB.get_record(buddy_id[0])
+                buddy = record_to_dict(buddy_jr)
 
-            # Get pre-calculated match details from match record
-            meeting_point = json.loads(match[2])
-            joint_destination = json.loads(match[3])
-            meeting_time = match[4]
+                # Get user's jr from DB
+                jr = DB.get_record(session['user_id'])
+                user = record_to_dict(jr)
 
-            buddy_display = buddy_results(user, buddy, meeting_point, joint_destination, meeting_time)
+                # Get pre-calculated match details from match record
+                meeting_point = json.loads(match[2])
+                joint_destination = json.loads(match[3])
+                meeting_time = match[4]
 
-            return render_template('your_buddy.html', buddy=buddy_display)
+                buddy_display = buddy_results(user, buddy, meeting_point, joint_destination, meeting_time)
+
+                return render_template('your_buddy.html', buddy=buddy_display)
 
 
 @app.route('/searching', methods=['POST'])
