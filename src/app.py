@@ -45,7 +45,7 @@ def user_input():
     user = process_input(data)
 
     # Handle invalid phone number input
-    if not type(user['phone_no']) == int:
+    if not user['phone_no'].isnumeric():
         raise ValueError("Wrong input for phone number: must be a number!")
 
     # Handle invalid location input
@@ -220,4 +220,4 @@ def show_map():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)  # localhost:5000 or 127.0.0.0.1:5000/
+    app.run(debug=True, port=4444)  # localhost:5000 or 127.0.0.0.1:5000/

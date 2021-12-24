@@ -10,7 +10,7 @@ def process_input(data: dict) -> dict:
 
     user['user_id'] = str(uuid.uuid1())
     user['username'] = data['username']
-    user['phone_no'] = int(data['phone_no'])
+    user['phone_no'] = str(data['phone_no'])
     user['curr_loc'] = geocode(data['current_loc'])  # convert to lat, lng using gmaps.geocode
     user['curr_loc_lat'] = user['curr_loc']['lat']  # unit: latitude in degrees
     user['curr_loc_lng'] = user['curr_loc']['lng']  # unit: longitude in degrees
