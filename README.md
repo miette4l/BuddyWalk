@@ -46,6 +46,9 @@ The video below demonstrates the process of how the app would work for two diffe
 BuddyWalk Demo Video
 --------------------
 
+https://user-images.githubusercontent.com/35227798/147373689-926bbe76-a2b6-4180-9435-059e5ae84b4b.mp4
+
+
 Credits
 -------
 
