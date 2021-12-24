@@ -12,7 +12,7 @@ BuddyWalk is a Flask web app, written in Python, and utilising MySQL. It current
 
 - Install all packages listed in 'requirements.txt'.
 
-- Create a root directory file entitled 'config.py' to enable the MySQL connection, with the following global variables from your own MySQL server connection:
+- Create a root directory file entitled 'config.py' to enable the MySQL connection, with the following global variables from your own MySQL server connection:  
   HOST = 'host'   
   USER = 'user'   
   PASSWORD = 'password'   
