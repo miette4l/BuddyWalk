@@ -2,8 +2,10 @@ import math
 
 import googlemaps
 from haversine import haversine, Unit
+from utils.api_key import GOOGLE_API_KEY
 
-gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
+
+gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
 
 
 def geocode(loc: str) -> tuple:

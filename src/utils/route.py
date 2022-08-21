@@ -2,9 +2,10 @@ from pprint import pprint as pp
 
 import folium
 import googlemaps
-from haversine import haversine, Unit
+from utils.api_key import GOOGLE_API_KEY
 
-gmaps = googlemaps.Client(key='AIzaSyDzj7gfcouVFtZAyzntCmyDUs8g_8s_yTM')
+
+gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
 
 
 class Route:
